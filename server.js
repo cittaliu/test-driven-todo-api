@@ -15,10 +15,11 @@ app.use(express.static(__dirname + '/public'));
 
 // our database is an array for now with some hardcoded values
 var todos = [
-  // { _id: 7, task: 'Laundry', description: 'Wash clothes' },
-  // { _id: 27, task: 'Grocery Shopping', description: 'Buy dinner for this week' },
-  // { _id: 44, task: 'Homework', description: 'Make this app super awesome!' }
+  { _id: 7, task: 'Laundry', description: 'Wash clothes' },
+  { _id: 27, task: 'Grocery Shopping', description: 'Buy dinner for this week' },
+  { _id: 44, task: 'Homework', description: 'Make this app super awesome!' }
 ];
+
 
 /**********
  * ROUTES *
@@ -47,23 +48,56 @@ app.get('/api/todos/search', function search(req, res) {
   /* This endpoint responds with the search results from the
    * query in the request. COMPLETE THIS ENDPOINT LAST.
    */
+   var creteria = req.query.q;
+   var searchTask = function(){
+     for(var i=0; i<todos.length; i++){
+        if(todos[i].task.toLowerCase() !== creteria){
+          todos.splice(i, 1);
+        }
+     }
+     return {todos: todos};
+   };
+   res.send(searchTask());
 });
 
 app.get('/api/todos', function index(req, res) {
   /* This endpoint responds with all of the todos
    */
+  res.json({todos});
+ // console.log(statusCode);
+ /* This endpoint responds with all of the todos
+  */
 });
 
 app.post('/api/todos', function create(req, res) {
   /* This endpoint will add a todo to our "database"
    * and respond with the newly created todo.
    */
+  var id = parseInt(todos[todos.length-1]._id)+1;
+//  var id = req.body.id;
+  var task = req.body.task;
+  var description = req.body.description;
+  var newTodos = { _id: id, task: task, description: description};
+
+  todos.push(newTodos);
+  res.json(newTodos);
+
 });
 
 app.get('/api/todos/:id', function show(req, res) {
   /* This endpoint will return a single todo with the
    * id specified in the route parameter (:id)
    */
+   var cur = parseInt(req.params.id);
+   var setId = function(){
+     for(var i=0; i< todos.length; i++){
+       if(todos[i]._id===cur){
+         return todos[i];
+       }
+     }
+   }
+   res.json(setId());
+
 });
 
 app.put('/api/todos/:id', function update(req, res) {
@@ -71,14 +105,39 @@ app.put('/api/todos/:id', function update(req, res) {
    * id specified in the route parameter (:id) and respond
    * with the newly updated todo.
    */
+   var cur = parseInt(req.params.id);
+   var task = req.body.task;
+   var description = req.body.description;
+   var updateId = function(){
+     for(var i=0; i< todos.length; i++){
+       if(todos[i]._id===cur){
+         todos[i].task = task;
+         todos[i].description = description;
+         return todos[i];
+       }
+     }
+   };
+   res.send(updateId());
 });
+
 
 app.delete('/api/todos/:id', function destroy(req, res) {
   /* This endpoint will delete a single todo with the
    * id specified in the route parameter (:id) and respond
    * with success.
    */
+   var cur = parseInt(req.params.id);
+   var deleteId = function(){
+     for(var i=0; i< todos.length; i++){
+       if(todos[i]._id===cur){
+         todos.splice(i, 1);
+         return todos;
+       }
+     }
+   };
+   res.send(deleteId());
 });
+
 
 /**********
  * SERVER *
